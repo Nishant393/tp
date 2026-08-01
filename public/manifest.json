@@ -1,0 +1,13 @@
+{
+  "name": "Orange Multipurpose Security Service",
+  "short_name": "OMSS Billing",
+  "description": "Professional billing & receipt generator for Orange Multipurpose Security Service",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF7ED",
+  "theme_color": "#F97316",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
