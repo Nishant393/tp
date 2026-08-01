@@ -11,7 +11,7 @@ const formatCurrency = (n) =>
 // Bill-book style tables look best with a fixed minimum number of numbered
 // rows (like the printed OMSS receipt book), padded out with blank rows when
 // there are fewer real items so the table never looks sparse.
-const MIN_ROWS = 8
+const MIN_ROWS = 6
 
 /**
  * The printable/exportable invoice itself — styled to match the physical
@@ -47,10 +47,10 @@ const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref
     <div
       id="invoice-print-area"
       ref={ref}
-      className="mx-auto w-full max-w-[210mm] bg-white text-slate-800"
-      style={{ minHeight: '297mm', fontFamily: 'Inter, sans-serif' }}
+      className="mx-auto w-full max-w-[210mm] bg-[#ffffff] text-[#1e293b]"
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
-      <div className="p-8 sm:p-10">
+      <div className="p-6 sm:p-8">
         {/* ===== Header: logo + company name ===== */}
         <div className="flex items-start gap-4">
           <div className="flex shrink-0 flex-col items-center text-center">
@@ -75,8 +75,8 @@ const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref
         </div>
 
         {/* ===== Contact strip ===== */}
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 border-t border-b border-slate-300 py-3 text-xs text-slate-700">
-          <div className="flex items-start gap-1.5 sm:border-r sm:border-slate-300 sm:pr-2">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 border-t border-b border-[#cbd5e1] py-3 text-xs text-[#334155]">
+          <div className="flex items-start gap-1.5 sm:border-r sm:border-[#cbd5e1] sm:pr-2">
             <FiMapPin className="mt-0.5 shrink-0 text-[#0A2E8A]" size={13} />
             <span>
               {company.addressLine1}
@@ -84,7 +84,7 @@ const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref
               {company.addressLine2}
             </span>
           </div>
-          <div className="flex items-start gap-1.5 sm:border-r sm:border-slate-300 sm:pr-2 sm:pl-2">
+          <div className="flex items-start gap-1.5 sm:border-r sm:border-[#cbd5e1] sm:pr-2 sm:pl-2">
             <FiPhone className="mt-0.5 shrink-0 text-[#0A2E8A]" size={13} />
             <span>
               MOBILE NO.
@@ -100,52 +100,42 @@ const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref
 
         {/* ===== Bill/Receipt title ===== */}
         <div className="mt-5 flex items-center justify-between gap-3">
-          <div className="h-px flex-1 bg-slate-300" />
+          <div className="h-px flex-1 bg-[#cbd5e1]" />
           <h3 className="font-display text-2xl font-extrabold tracking-wide text-[#0A2E8A]">BILL / RECEIPT</h3>
-          <div className="h-px flex-1 bg-slate-300" />
+          <div className="h-px flex-1 bg-[#cbd5e1]" />
         </div>
-        <div className="mt-2 flex justify-end">
-          <span className="rounded border border-[#0A2E8A] px-3 py-1 text-[10px] font-semibold text-[#0A2E8A]">
-            For Self Company Use
-          </span>
-        </div>
-
         {/* ===== Bill meta: date/bill-to (left) + state/state code (right) ===== */}
         <div className="mt-3 flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex-1 space-y-2 text-sm">
             <p>
-              <span className="font-semibold text-slate-600">Date:</span>{' '}
+              <span className="font-semibold text-[#475569]">Date:</span>{' '}
               {date ? dayjs(date).format('DD/MM/YYYY') : '—'}
             </p>
             <div>
-              <span className="font-semibold text-slate-600">Bill To:</span>
-              <p className="mt-0.5 font-semibold text-slate-800">{customer.customerName || '—'}</p>
-              {customer.companyName && <p className="text-slate-600">{customer.companyName}</p>}
-              {customer.address && <p className="text-slate-600 whitespace-pre-line">{customer.address}</p>}
-              <p className="text-slate-600">
+              <span className="font-semibold text-[#475569]">Bill To:</span>
+              <p className="mt-0.5 font-semibold text-[#1e293b]">{customer.customerName || '—'}</p>
+              {customer.companyName && <p className="text-[#475569]">{customer.companyName}</p>}
+              {customer.address && <p className="text-[#475569] whitespace-pre-line">{customer.address}</p>}
+              <p className="text-[#475569]">
                 {customer.mobile}
                 {customer.email ? ` · ${customer.email}` : ''}
               </p>
             </div>
             <p>
-              <span className="font-semibold text-slate-600">GSTIN:</span> {customer.gstin || '—'}
+              <span className="font-semibold text-[#475569]">GSTIN:</span> {customer.gstin || '—'}
             </p>
             <p>
-              <span className="font-semibold text-slate-600">Bill No.:</span>{' '}
+              <span className="font-semibold text-[#475569]">Bill No.:</span>{' '}
               <span className="font-mono font-semibold">{billNumber}</span>
             </p>
           </div>
           <div className="shrink-0 space-y-2 text-sm sm:text-right">
             <p>
-              <span className="font-semibold text-slate-600">State:</span> {customer.state || '—'}
+              <span className="font-semibold text-[#475569]">State:</span> {customer.state || '—'}
             </p>
             <p>
-              <span className="font-semibold text-slate-600">State Code:</span> {customer.stateCode || '—'}
+              <span className="font-semibold text-[#475569]">State Code:</span> {customer.stateCode || '—'}
             </p>
-            <div className="mt-2 flex flex-col items-center sm:items-end">
-              <QRCodeSVG value={qrValue} size={70} fgColor="#0A2E8A" />
-              <p className="mt-1 text-[9px] text-slate-400">Scan to verify</p>
-            </div>
           </div>
         </div>
 
@@ -163,24 +153,24 @@ const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref
           <tbody>
             {items.map((item, i) => (
               <tr key={item.id || i}>
-                <td className="border border-slate-300 px-2 py-2 text-center text-slate-500">{i + 1}.</td>
-                <td className="border border-slate-300 px-3 py-2">{item.description || '—'}</td>
-                <td className="border border-slate-300 px-2 py-2 text-center">{item.quantity}</td>
-                <td className="border border-slate-300 px-2 py-2 text-right">{formatCurrency(item.rate)}</td>
-                <td className="border border-slate-300 px-3 py-2 text-right font-medium">
+                <td className="border border-[#cbd5e1] px-2 py-2 text-center text-[#64748b]">{i + 1}.</td>
+                <td className="border border-[#cbd5e1] px-3 py-2">{item.description || '—'}</td>
+                <td className="border border-[#cbd5e1] px-2 py-2 text-center">{item.quantity}</td>
+                <td className="border border-[#cbd5e1] px-2 py-2 text-right">{formatCurrency(item.rate)}</td>
+                <td className="border border-[#cbd5e1] px-3 py-2 text-right font-medium">
                   {formatCurrency((Number(item.quantity) || 0) * (Number(item.rate) || 0))}
                 </td>
               </tr>
             ))}
             {Array.from({ length: blankRows }).map((_, i) => (
               <tr key={`blank-${i}`}>
-                <td className="border border-slate-300 px-2 py-2 text-center text-slate-300">
+                <td className="border border-[#cbd5e1] px-2 py-2 text-center text-[#cbd5e1]">
                   {items.length + i + 1}.
                 </td>
-                <td className="border border-slate-300 px-3 py-2">&nbsp;</td>
-                <td className="border border-slate-300 px-2 py-2">&nbsp;</td>
-                <td className="border border-slate-300 px-2 py-2">&nbsp;</td>
-                <td className="border border-slate-300 px-3 py-2">&nbsp;</td>
+                <td className="border border-[#cbd5e1] px-3 py-2">&nbsp;</td>
+                <td className="border border-[#cbd5e1] px-2 py-2">&nbsp;</td>
+                <td className="border border-[#cbd5e1] px-2 py-2">&nbsp;</td>
+                <td className="border border-[#cbd5e1] px-3 py-2">&nbsp;</td>
               </tr>
             ))}
           </tbody>
@@ -190,15 +180,15 @@ const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref
         <div className="mt-4 flex flex-col sm:flex-row justify-between gap-6">
           <div className="flex-1 space-y-3">
             <div>
-              <p className="text-xs font-semibold text-slate-600">Amount in Words :</p>
-              <p className="mt-1 border-b border-dotted border-slate-400 pb-1 text-sm italic text-slate-700">
+              <p className="text-xs font-semibold text-[#475569]">Amount in Words :</p>
+              <p className="mt-1 border-b border-dotted border-[#94a3b8] pb-1 text-sm italic text-[#334155]">
                 {numberToWords(grandTotal)}
               </p>
             </div>
             {notes && (
               <div>
-                <p className="text-xs font-semibold text-slate-600">Notes :</p>
-                <p className="mt-1 rounded border border-slate-300 px-3 py-2 text-sm text-slate-600 whitespace-pre-line">
+                <p className="text-xs font-semibold text-[#475569]">Notes :</p>
+                <p className="mt-1 rounded border border-[#cbd5e1] px-3 py-2 text-sm text-[#475569] whitespace-pre-line">
                   {notes}
                 </p>
               </div>
@@ -207,20 +197,20 @@ const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref
           <table className="w-full sm:w-64 shrink-0 border-collapse text-sm">
             <tbody>
               <tr>
-                <td className="border border-slate-300 px-3 py-1.5 font-medium text-slate-600">SUBTOTAL</td>
-                <td className="border border-slate-300 px-3 py-1.5 text-right">{formatCurrency(subtotal)}</td>
+                <td className="border border-[#cbd5e1] px-3 py-1.5 font-medium text-[#475569]">SUBTOTAL</td>
+                <td className="border border-[#cbd5e1] px-3 py-1.5 text-right">{formatCurrency(subtotal)}</td>
               </tr>
               <tr>
-                <td className="border border-slate-300 px-3 py-1.5 font-medium text-slate-600">
+                <td className="border border-[#cbd5e1] px-3 py-1.5 font-medium text-[#475569]">
                   DISCOUNT {discountType === 'percent' && discountValue ? `(${discountValue}%)` : ''}
                 </td>
-                <td className="border border-slate-300 px-3 py-1.5 text-right">{formatCurrency(discount)}</td>
+                <td className="border border-[#cbd5e1] px-3 py-1.5 text-right">{formatCurrency(discount)}</td>
               </tr>
               <tr>
-                <td className="border border-slate-300 px-3 py-1.5 font-medium text-slate-600">
+                <td className="border border-[#cbd5e1] px-3 py-1.5 font-medium text-[#475569]">
                   TAX {taxPercent ? `(${taxPercent}%)` : ''}
                 </td>
-                <td className="border border-slate-300 px-3 py-1.5 text-right">{formatCurrency(tax)}</td>
+                <td className="border border-[#cbd5e1] px-3 py-1.5 text-right">{formatCurrency(tax)}</td>
               </tr>
               <tr className="bg-[#0A2E8A] text-white">
                 <td className="border border-[#0A2E8A] px-3 py-2 font-bold">TOTAL</td>
@@ -233,7 +223,7 @@ const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref
         </div>
 
         {/* ===== Bank details + signature ===== */}
-        <div className="mt-8 flex flex-col sm:flex-row justify-between gap-6 border-t border-dashed border-slate-300 pt-5">
+        <div className="mt-8 flex flex-col sm:flex-row justify-between gap-6 border-t border-dashed border-[#cbd5e1] pt-5">
           <div className="text-sm">
             <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[#0A2E8A]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -241,21 +231,21 @@ const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref
               </svg>{' '}
               Bank Details
             </p>
-            <p className="mt-1.5 text-slate-600">
-              <span className="font-medium text-slate-700">Bank Name :</span> {company.bank?.bankName}
+            <p className="mt-1.5 text-[#475569]">
+              <span className="font-medium text-[#334155]">Bank Name :</span> {company.bank?.bankName}
             </p>
-            <p className="text-slate-600">
-              <span className="font-medium text-slate-700">Account Name :</span> {company.bank?.accountName}
+            <p className="text-[#475569]">
+              <span className="font-medium text-[#334155]">Account Name :</span> {company.bank?.accountName}
             </p>
-            <p className="text-slate-600">
-              <span className="font-medium text-slate-700">Account No. :</span> {company.bank?.accountNumber}
+            <p className="text-[#475569]">
+              <span className="font-medium text-[#334155]">Account No. :</span> {company.bank?.accountNumber}
             </p>
-            <p className="text-slate-600">
-              <span className="font-medium text-slate-700">IFSC Code :</span> {company.bank?.ifsc}
+            <p className="text-[#475569]">
+              <span className="font-medium text-[#334155]">IFSC Code :</span> {company.bank?.ifsc}
             </p>
           </div>
           <div className="text-center shrink-0 self-end">
-            <p className="border-t border-slate-500 pt-1 text-xs text-slate-600">Authorized Signatory</p>
+            <p className="border-t border-[#64748b] pt-1 text-xs text-[#475569]">Authorized Signatory</p>
           </div>
         </div>
 

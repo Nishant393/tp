@@ -33,24 +33,19 @@ export async function generateInvoicePDF(element, fileName = 'invoice.pdf', opti
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
 
-  const imgWidth = pageWidth
-  const imgHeight = (canvas.height * imgWidth) / canvas.width
+  // Fit the whole invoice onto a single page. Scale by whichever dimension
+  // (width or height) is the tighter constraint, then center the result —
+  // this guarantees exactly one page, never a second overflow page.
+  const widthRatio = pageWidth / canvas.width
+  const heightRatio = pageHeight / canvas.height
+  const scale = Math.min(widthRatio, heightRatio)
 
-  if (imgHeight <= pageHeight) {
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST')
-  } else {
-    // Paginate if the invoice content is taller than one A4 page
-    let heightLeft = imgHeight
-    let position = 0
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST')
-    heightLeft -= pageHeight
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight
-      pdf.addPage()
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST')
-      heightLeft -= pageHeight
-    }
-  }
+  const imgWidth = canvas.width * scale
+  const imgHeight = canvas.height * scale
+  const offsetX = (pageWidth - imgWidth) / 2
+  const offsetY = (pageHeight - imgHeight) / 2
+
+  pdf.addImage(imgData, 'PNG', offsetX, offsetY, imgWidth, imgHeight, undefined, 'FAST')
 
   if (options.save !== false) {
     pdf.save(fileName)

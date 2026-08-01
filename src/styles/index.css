@@ -63,10 +63,8 @@ html.dark body {
     left: 0;
     top: 0;
     width: 210mm;
-    min-height: 297mm;
     margin: 0;
-    padding: 10mm;
-    box-shadow: none !important;
+    padding: 8mm;
   }
   .no-print { display: none !important; }
   @page { size: A4; margin: 0; }
