@@ -100,6 +100,13 @@ export default function NewBill() {
   useAutoSaveDraft(watch, !isEditMode)
   useUnsavedChangesWarning(isDirty)
 
+  // NOTE: react-hook-form's watch() mutates the underlying items array/objects
+  // in place rather than returning a new reference on every keystroke. Keying
+  // a useMemo on `values.items` (the reference) therefore misses quantity/rate
+  // edits — the memo would only recompute when discount/tax (plain primitives)
+  // changed, making the total look "stuck" until you touched discount. Keying
+  // on a serialized snapshot of the items fixes that.
+  const itemsSnapshot = JSON.stringify(values.items || [])
   const totals = useMemo(
     () =>
       calculateGrandTotal({
@@ -108,7 +115,8 @@ export default function NewBill() {
         discountType: values.discountType,
         taxPercent: values.taxPercent,
       }),
-    [values.items, values.discountValue, values.discountType, values.taxPercent]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [itemsSnapshot, values.discountValue, values.discountType, values.taxPercent]
   )
 
   const currentBill = {

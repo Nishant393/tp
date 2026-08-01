@@ -16,7 +16,7 @@ export default function ShieldLogo({ size = 40, className = '' }) {
       <defs>
         <linearGradient id="omssShieldGrad" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#FB923C" />
-          {/* <stop offset="100%" stopColor="#EA580C" /> */}
+          <stop offset="100%" stopColor="#EA580C" />
         </linearGradient>
       </defs>
       <path

@@ -51,4 +51,3 @@ src/
 - Company info and bank details ship with the real OMSS details from the brief and are editable from **Settings**.
 - Bill numbers are derived by scanning stored bills for the highest sequence used in the current year, so numbering stays correct even after deletions.
 - The floating action button, bottom navigation, and preview modal are mobile-first; the sidebar and side-by-side live preview activate at the `lg` breakpoint.
-# tp

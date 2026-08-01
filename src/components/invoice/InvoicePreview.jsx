@@ -1,19 +1,38 @@
 import { forwardRef } from 'react'
 import dayjs from 'dayjs'
 import { QRCodeSVG } from 'qrcode.react'
+import { FiMapPin, FiPhone, FiMail } from 'react-icons/fi'
 import ShieldLogo from '../ui/ShieldLogo'
 import { numberToWords } from '../../utils/numberToWords'
 
 const formatCurrency = (n) =>
-  `Rs. ${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  `\u20B9${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+// Bill-book style tables look best with a fixed minimum number of numbered
+// rows (like the printed OMSS receipt book), padded out with blank rows when
+// there are fewer real items so the table never looks sparse.
+const MIN_ROWS = 8
 
 /**
- * The printable/exportable invoice itself — styled like a traditional
- * printed receipt book (A4 portrait), captured by html2canvas for PDF
- * export and shown live in the New Bill page as a preview.
+ * The printable/exportable invoice itself — styled to match the physical
+ * "Orange Multipurpose Security Service" bill / receipt book (A4 portrait),
+ * captured by html2canvas-pro for PDF export and shown live as a preview.
  */
 const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref) {
-  const { billNumber, date, customer = {}, items = [], notes, subtotal, discount, tax, grandTotal, discountType, discountValue, taxPercent } = bill
+  const {
+    billNumber,
+    date,
+    customer = {},
+    items = [],
+    notes,
+    subtotal,
+    discount,
+    tax,
+    grandTotal,
+    discountType,
+    discountValue,
+    taxPercent,
+  } = bill
 
   const qrValue = JSON.stringify({
     bill: billNumber,
@@ -22,144 +41,226 @@ const InvoicePreview = forwardRef(function InvoicePreview({ bill, company }, ref
     date,
   })
 
+  const blankRows = Math.max(0, MIN_ROWS - items.length)
+
   return (
     <div
       id="invoice-print-area"
       ref={ref}
-      className="mx-auto w-full max-w-[210mm] bg-white text-slate-800 shadow-lg print:shadow-none"
+      className="mx-auto w-full max-w-[210mm] bg-white text-slate-800"
       style={{ minHeight: '297mm', fontFamily: 'Inter, sans-serif' }}
     >
       <div className="p-8 sm:p-10">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b-4 border-[#0A2E8A] pb-5">
-          <div className="flex items-start gap-3">
-            <ShieldLogo size={56} />
+        {/* ===== Header: logo + company name ===== */}
+        <div className="flex items-start gap-4">
+          <div className="flex shrink-0 flex-col items-center text-center">
+            <ShieldLogo size={64} />
+            <p className="mt-1 w-20 text-[9px] font-bold leading-tight text-[#0A2E8A]">
+              ORANGE
+              <br />
+              MULTIPURPOSE
+              <br />
+              SECURITY SERVICE
+            </p>
+          </div>
+          <div className="flex-1 pt-1 text-center">
+            <h1 className="font-display text-2xl sm:text-[28px] font-extrabold uppercase leading-[1.1] text-[#F97316]">
+              {company.name?.split(' ').slice(0, 2).join(' ') || 'Orange Multipurpose'}
+            </h1>
+            <h2 className="font-display text-3xl sm:text-[34px] font-extrabold uppercase leading-[1.1] text-[#0A2E8A]">
+              {company.name?.split(' ').slice(2).join(' ') || 'Security Service'}
+            </h2>
+          </div>
+          <div className="w-16 shrink-0" />
+        </div>
+
+        {/* ===== Contact strip ===== */}
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 border-t border-b border-slate-300 py-3 text-xs text-slate-700">
+          <div className="flex items-start gap-1.5 sm:border-r sm:border-slate-300 sm:pr-2">
+            <FiMapPin className="mt-0.5 shrink-0 text-[#0A2E8A]" size={13} />
+            <span>
+              {company.addressLine1}
+              <br />
+              {company.addressLine2}
+            </span>
+          </div>
+          <div className="flex items-start gap-1.5 sm:border-r sm:border-slate-300 sm:pr-2 sm:pl-2">
+            <FiPhone className="mt-0.5 shrink-0 text-[#0A2E8A]" size={13} />
+            <span>
+              MOBILE NO.
+              <br />
+              {(company.phones || []).join(' / ')}
+            </span>
+          </div>
+          <div className="flex items-start gap-1.5 sm:pl-2">
+            <FiMail className="mt-0.5 shrink-0 text-[#0A2E8A]" size={13} />
+            <span>{company.email}</span>
+          </div>
+        </div>
+
+        {/* ===== Bill/Receipt title ===== */}
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <div className="h-px flex-1 bg-slate-300" />
+          <h3 className="font-display text-2xl font-extrabold tracking-wide text-[#0A2E8A]">BILL / RECEIPT</h3>
+          <div className="h-px flex-1 bg-slate-300" />
+        </div>
+        <div className="mt-2 flex justify-end">
+          <span className="rounded border border-[#0A2E8A] px-3 py-1 text-[10px] font-semibold text-[#0A2E8A]">
+            For Self Company Use
+          </span>
+        </div>
+
+        {/* ===== Bill meta: date/bill-to (left) + state/state code (right) ===== */}
+        <div className="mt-3 flex flex-col sm:flex-row justify-between gap-4">
+          <div className="flex-1 space-y-2 text-sm">
+            <p>
+              <span className="font-semibold text-slate-600">Date:</span>{' '}
+              {date ? dayjs(date).format('DD/MM/YYYY') : '—'}
+            </p>
             <div>
-              <h1 className="font-display text-2xl font-extrabold leading-tight text-[#F97316]">
-                {company.name}
-              </h1>
-              <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-                {company.addressLine1}
-                <br />
-                {company.addressLine2}
-              </p>
-              <p className="mt-1 text-xs text-slate-600">
-                {(company.phones || []).join(' / ')} &nbsp;·&nbsp; {company.email}
+              <span className="font-semibold text-slate-600">Bill To:</span>
+              <p className="mt-0.5 font-semibold text-slate-800">{customer.customerName || '—'}</p>
+              {customer.companyName && <p className="text-slate-600">{customer.companyName}</p>}
+              {customer.address && <p className="text-slate-600 whitespace-pre-line">{customer.address}</p>}
+              <p className="text-slate-600">
+                {customer.mobile}
+                {customer.email ? ` · ${customer.email}` : ''}
               </p>
             </div>
-          </div>
-          <div className="text-right shrink-0">
-            <p className="font-display text-lg font-bold text-[#0A2E8A]">INVOICE</p>
-            <p className="mt-1 text-xs text-slate-500">Bill No.</p>
-            <p className="font-mono text-sm font-semibold text-slate-800">{billNumber}</p>
-            <p className="mt-1 text-xs text-slate-500">Date</p>
-            <p className="text-sm font-semibold text-slate-800">{dayjs(date).format('DD MMM YYYY')}</p>
-          </div>
-        </div>
-
-        {/* Customer + QR */}
-        <div className="mt-5 flex flex-col sm:flex-row justify-between gap-4">
-          <div className="flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#0A2E8A]">Bill To</p>
-            <p className="mt-1 font-semibold text-slate-800">{customer.customerName || '—'}</p>
-            {customer.companyName && <p className="text-sm text-slate-600">{customer.companyName}</p>}
-            {customer.address && <p className="text-sm text-slate-600 whitespace-pre-line">{customer.address}</p>}
-            <p className="mt-1 text-sm text-slate-600">
-              {customer.mobile}
-              {customer.email ? ` · ${customer.email}` : ''}
+            <p>
+              <span className="font-semibold text-slate-600">GSTIN:</span> {customer.gstin || '—'}
             </p>
-            {(customer.gstin || customer.state) && (
-              <p className="mt-1 text-xs text-slate-500">
-                {customer.gstin && `GSTIN: ${customer.gstin}`}
-                {customer.state && `  ·  State: ${customer.state}${customer.stateCode ? ` (${customer.stateCode})` : ''}`}
-              </p>
-            )}
+            <p>
+              <span className="font-semibold text-slate-600">Bill No.:</span>{' '}
+              <span className="font-mono font-semibold">{billNumber}</span>
+            </p>
           </div>
-          <div className="shrink-0 flex flex-col items-center">
-            <QRCodeSVG value={qrValue} size={76} fgColor="#0A2E8A" />
-            <p className="mt-1 text-[10px] text-slate-400">Scan to verify</p>
+          <div className="shrink-0 space-y-2 text-sm sm:text-right">
+            <p>
+              <span className="font-semibold text-slate-600">State:</span> {customer.state || '—'}
+            </p>
+            <p>
+              <span className="font-semibold text-slate-600">State Code:</span> {customer.stateCode || '—'}
+            </p>
+            <div className="mt-2 flex flex-col items-center sm:items-end">
+              <QRCodeSVG value={qrValue} size={70} fgColor="#0A2E8A" />
+              <p className="mt-1 text-[9px] text-slate-400">Scan to verify</p>
+            </div>
           </div>
         </div>
 
-        {/* Items table */}
-        <table className="mt-6 w-full border-collapse text-sm">
+        {/* ===== Items table ===== */}
+        <table className="mt-5 w-full border-collapse text-sm">
           <thead>
             <tr className="bg-[#0A2E8A] text-white">
-              <th className="px-3 py-2.5 text-left font-semibold rounded-l-md">#</th>
-              <th className="px-3 py-2.5 text-left font-semibold">Description</th>
-              <th className="px-3 py-2.5 text-right font-semibold">Qty</th>
-              <th className="px-3 py-2.5 text-right font-semibold">Rate</th>
-              <th className="px-3 py-2.5 text-right font-semibold rounded-r-md">Amount</th>
+              <th className="border border-[#0A2E8A] px-2 py-2.5 text-center font-semibold w-10">S. No.</th>
+              <th className="border border-[#0A2E8A] px-3 py-2.5 text-left font-semibold">Description</th>
+              <th className="border border-[#0A2E8A] px-2 py-2.5 text-center font-semibold w-16">Qty.</th>
+              <th className="border border-[#0A2E8A] px-2 py-2.5 text-right font-semibold w-24">Rate</th>
+              <th className="border border-[#0A2E8A] px-3 py-2.5 text-right font-semibold w-28">Amount (₹)</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item, i) => (
-              <tr key={item.id || i} className={i % 2 === 0 ? 'bg-orange-50/40' : 'bg-white'}>
-                <td className="px-3 py-2 border-b border-slate-100 text-slate-500">{i + 1}</td>
-                <td className="px-3 py-2 border-b border-slate-100">{item.description || '—'}</td>
-                <td className="px-3 py-2 border-b border-slate-100 text-right">{item.quantity}</td>
-                <td className="px-3 py-2 border-b border-slate-100 text-right">{formatCurrency(item.rate)}</td>
-                <td className="px-3 py-2 border-b border-slate-100 text-right font-medium">
+              <tr key={item.id || i}>
+                <td className="border border-slate-300 px-2 py-2 text-center text-slate-500">{i + 1}.</td>
+                <td className="border border-slate-300 px-3 py-2">{item.description || '—'}</td>
+                <td className="border border-slate-300 px-2 py-2 text-center">{item.quantity}</td>
+                <td className="border border-slate-300 px-2 py-2 text-right">{formatCurrency(item.rate)}</td>
+                <td className="border border-slate-300 px-3 py-2 text-right font-medium">
                   {formatCurrency((Number(item.quantity) || 0) * (Number(item.rate) || 0))}
                 </td>
+              </tr>
+            ))}
+            {Array.from({ length: blankRows }).map((_, i) => (
+              <tr key={`blank-${i}`}>
+                <td className="border border-slate-300 px-2 py-2 text-center text-slate-300">
+                  {items.length + i + 1}.
+                </td>
+                <td className="border border-slate-300 px-3 py-2">&nbsp;</td>
+                <td className="border border-slate-300 px-2 py-2">&nbsp;</td>
+                <td className="border border-slate-300 px-2 py-2">&nbsp;</td>
+                <td className="border border-slate-300 px-3 py-2">&nbsp;</td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        {/* Summary */}
-        <div className="mt-5 flex flex-col sm:flex-row justify-between gap-6">
-          <div className="flex-1">
+        {/* ===== Amount in words / notes (left) + totals box (right) ===== */}
+        <div className="mt-4 flex flex-col sm:flex-row justify-between gap-6">
+          <div className="flex-1 space-y-3">
+            <div>
+              <p className="text-xs font-semibold text-slate-600">Amount in Words :</p>
+              <p className="mt-1 border-b border-dotted border-slate-400 pb-1 text-sm italic text-slate-700">
+                {numberToWords(grandTotal)}
+              </p>
+            </div>
             {notes && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#0A2E8A]">Notes</p>
-                <p className="mt-1 text-sm text-slate-600 whitespace-pre-line">{notes}</p>
+                <p className="text-xs font-semibold text-slate-600">Notes :</p>
+                <p className="mt-1 rounded border border-slate-300 px-3 py-2 text-sm text-slate-600 whitespace-pre-line">
+                  {notes}
+                </p>
               </div>
             )}
-            <div className="mt-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#0A2E8A]">Amount in Words</p>
-              <p className="mt-1 text-sm italic text-slate-700">{numberToWords(grandTotal)}</p>
-            </div>
           </div>
-          <div className="w-full sm:w-64 shrink-0 space-y-1.5 text-sm">
-            <div className="flex justify-between text-slate-600">
-              <span>Subtotal</span>
-              <span>{formatCurrency(subtotal)}</span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-              <span>Discount {discountType === 'percent' ? `(${discountValue || 0}%)` : ''}</span>
-              <span>- {formatCurrency(discount)}</span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-              <span>Tax {taxPercent ? `(${taxPercent}%)` : ''}</span>
-              <span>+ {formatCurrency(tax)}</span>
-            </div>
-            <div className="flex justify-between border-t-2 border-[#0A2E8A] pt-2 text-base font-bold text-[#0A2E8A]">
-              <span>Grand Total</span>
-              <span>{formatCurrency(grandTotal)}</span>
-            </div>
-          </div>
+          <table className="w-full sm:w-64 shrink-0 border-collapse text-sm">
+            <tbody>
+              <tr>
+                <td className="border border-slate-300 px-3 py-1.5 font-medium text-slate-600">SUBTOTAL</td>
+                <td className="border border-slate-300 px-3 py-1.5 text-right">{formatCurrency(subtotal)}</td>
+              </tr>
+              <tr>
+                <td className="border border-slate-300 px-3 py-1.5 font-medium text-slate-600">
+                  DISCOUNT {discountType === 'percent' && discountValue ? `(${discountValue}%)` : ''}
+                </td>
+                <td className="border border-slate-300 px-3 py-1.5 text-right">{formatCurrency(discount)}</td>
+              </tr>
+              <tr>
+                <td className="border border-slate-300 px-3 py-1.5 font-medium text-slate-600">
+                  TAX {taxPercent ? `(${taxPercent}%)` : ''}
+                </td>
+                <td className="border border-slate-300 px-3 py-1.5 text-right">{formatCurrency(tax)}</td>
+              </tr>
+              <tr className="bg-[#0A2E8A] text-white">
+                <td className="border border-[#0A2E8A] px-3 py-2 font-bold">TOTAL</td>
+                <td className="border border-[#0A2E8A] px-3 py-2 text-right font-bold">
+                  {formatCurrency(grandTotal)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        {/* Bank details + signature */}
+        {/* ===== Bank details + signature ===== */}
         <div className="mt-8 flex flex-col sm:flex-row justify-between gap-6 border-t border-dashed border-slate-300 pt-5">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#0A2E8A]">Bank Details</p>
-            <p className="mt-1 text-sm text-slate-600">Bank: {company.bank?.bankName}</p>
-            <p className="text-sm text-slate-600">A/C Name: {company.bank?.accountName}</p>
-            <p className="text-sm text-slate-600">A/C No: {company.bank?.accountNumber}</p>
-            <p className="text-sm text-slate-600">IFSC: {company.bank?.ifsc}</p>
+          <div className="text-sm">
+            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[#0A2E8A]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2 2 8v2h20V8L12 2zm-8 9v8h3v-8H4zm6.5 0v8h3v-8h-3zm7 0v8h3v-8h-3zM2 21h20v-2H2v2z" />
+              </svg>{' '}
+              Bank Details
+            </p>
+            <p className="mt-1.5 text-slate-600">
+              <span className="font-medium text-slate-700">Bank Name :</span> {company.bank?.bankName}
+            </p>
+            <p className="text-slate-600">
+              <span className="font-medium text-slate-700">Account Name :</span> {company.bank?.accountName}
+            </p>
+            <p className="text-slate-600">
+              <span className="font-medium text-slate-700">Account No. :</span> {company.bank?.accountNumber}
+            </p>
+            <p className="text-slate-600">
+              <span className="font-medium text-slate-700">IFSC Code :</span> {company.bank?.ifsc}
+            </p>
           </div>
-          <div className="text-center shrink-0">
-            <div className="flex h-16 w-40 items-center justify-center rounded border border-dashed border-slate-300 text-[11px] text-slate-400">
-              Company Stamp
-            </div>
-            <p className="mt-8 border-t border-slate-400 pt-1 text-xs text-slate-500">Authorized Signatory</p>
+          <div className="text-center shrink-0 self-end">
+            <p className="border-t border-slate-500 pt-1 text-xs text-slate-600">Authorized Signatory</p>
           </div>
         </div>
 
-        <p className="mt-8 text-center text-[11px] text-slate-400">
-          This is a computer-generated invoice from {company.name}. Thank you for your business.
+        <p className="mt-6 text-center text-sm font-semibold tracking-wide text-[#F97316]">
+          ★ ★ ★ Thank You! ★ ★ ★
         </p>
       </div>
     </div>

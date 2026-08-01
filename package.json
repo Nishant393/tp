@@ -14,7 +14,7 @@
     "dayjs": "^1.11.21",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.43.0",
-    "html2canvas": "^1.4.1",
+    "html2canvas-pro": "^2.3.2",
     "jsbarcode": "^3.12.3",
     "jspdf": "^4.2.1",
     "qrcode.react": "^4.2.0",
